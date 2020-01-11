@@ -1,11 +1,11 @@
 <template>
-<!-- 文章模块 -->
-  <div>文章</div>
+<!-- 搜索结果组件 -->
+  <div>搜索结果</div>
 </template>
 
 <script>
 export default {
-  name: 'article'
+  name: 'searchResult'
 }
 </script>
 

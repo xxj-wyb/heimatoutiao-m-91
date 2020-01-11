@@ -1,11 +1,11 @@
 <template>
-<!-- 文章模块 -->
-  <div>文章</div>
+<!-- 编辑资料 -->
+  <div>编辑资料</div>
 </template>
 
 <script>
 export default {
-  name: 'article'
+  name: 'profile'
 }
 </script>
 
