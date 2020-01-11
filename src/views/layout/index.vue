@@ -4,7 +4,7 @@
     <!-- 可以采用vant的导航组件来实现 -->
     <!-- fixed 是否固定-->
     <!-- 如果选中的是'我的'标签，应该隐藏 NavBar , 此时内容容器 my-wrapper要去除上内边距。 -->
-    <van-nav-bar v-if="showNavBar" fixed title="黑马头条"></van-nav-bar>
+    <van-nav-bar @click-right="$router.push('/search')" v-if="showNavBar" fixed title="黑马头条" right-text="搜索"></van-nav-bar>
     <div class="my-wrapper" :class="{ noTop: !showNavBar }">
       <!-- 二级路由容器(必须有)： 首页、问答、视频、我的 -->
       <router-view></router-view>
