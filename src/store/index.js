@@ -1,3 +1,4 @@
+// 状态文件
 import Vue from 'vue'
 import Vuex from 'vuex'
 
