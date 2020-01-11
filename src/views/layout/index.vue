@@ -13,7 +13,7 @@
     <!-- 标签栏  开启路由模式 route  :route="true"(布尔)  route="true"(字符串)-->
     <van-tabbar route>
       <van-tabbar-item to="/" icon="home-o">首页</van-tabbar-item>
-      <van-tabbar-item to="/question" icon="search">问答</van-tabbar-item>
+      <van-tabbar-item to="/question" icon="chat-o">问答</van-tabbar-item>
       <van-tabbar-item to="/video" icon="video-o">视频</van-tabbar-item>
       <van-tabbar-item to="/user" icon="user-o">我的</van-tabbar-item>
     </van-tabbar>
