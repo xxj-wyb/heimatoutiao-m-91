@@ -1,3 +1,5 @@
+// utils文件夹：工具模块
+
 // 专门处理用户信息的存储和删除 以及获取并放置在 localStorge
 // 设置一个key,这个key专门用来存储 用户信息
 const USER_TOKEN = 'heima-toutiao-m-91-token'
