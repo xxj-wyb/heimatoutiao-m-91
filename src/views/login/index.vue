@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import { login } from '@/api/user' // 导入封装的登录方法
+import { mapMutations } from 'vuex'
 export default {
   name: 'login',
   data () {
@@ -81,13 +83,30 @@ export default {
       return true
     },
     // 登录方法
-    login () {
+    async login () {
       if (this.checkMobile() && this.checkCode()) {
         // 手机号和验证码都通过了 表示前端校验通过, 此时还要调用接口
-        // 提示消息 表示登录成功
-        console.log('校验通过')
+        // console.log('校验通过')
+        // this.loginForm 会把数据传给 login方法中的 data
+        const data = await login(this.loginForm) // 获取结果：token、refresh_token
+        // 拿到了token 更新token信息,调用store/index.js中的 updateUser 方法
+        // this.$store.commit('updateUser', { user: data }) // 第一种写法
+        this.updateUser({ user: data }) // 更新用户信息  参数就是载荷user，实际上就是获取到的data
+
+        // 登录成功 提示消息
+        // 把这个修改时间duration的方法在 @/utils/plugin 中封装成一个插件，在main.js中全局注册
+        // duration: 展示时长(ms)，值为 0 时，notify 不会消失   默认值为 3000
+        // this.$notify({ type: 'success', message: '登录成功' },duration:1000 )
+        this.$gnotify({ type: 'success', message: '登录成功' })
+
+        // 跳转
+        // 有两种情况 1.有redirectUrl (登录未遂 =>去登录 =>成功=>到redirectUrl地址的页面); 2.没有 redirectUrl=>跳到首页
+        // 判断有无redirectUrl: 它在=> query: { redirectUrl: router.currentRoute.path }
+        let { redirectUrl } = this.$route.query // 解构当前的路由信息,获取redirectUrl
+        this.$router.push(redirectUrl || '/') // 短路表达式:前面的不成功执行后面的，前面的成功不执行后面的
       }
-    }
+    },
+    ...mapMutations(['updateUser'])
   }
 }
 </script>

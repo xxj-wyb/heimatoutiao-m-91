@@ -30,6 +30,7 @@ instance.interceptors.request.use(function (config) {
     // 如果token存在 就要统一注入
     config.header['Authorization'] = `Bearer ${store.state.user.token}`
   }
+  return config
 }, function (error) {
   // 返回失败 没有获取到token
   return Promise.reject(error)
