@@ -51,6 +51,7 @@ instance.interceptors.response.use(function (response) {
   if (error.response && error.response.status === 401) {
     // router除了push一个字符串,还可以push一个对象
     // router.push({ path: '/login', query: { redirectUrl: path } })
+    // router.currentRoute.path当前页面现在没有权限，登录以后有权限了就可以访问了，所以要把这个地址传给登录页面
     let toPath = { path: '/login', query: { redirectUrl: router.currentRoute.path } } // 定义首页跳转对象
     //  表示token过期 先判断 是否有refresh_token,这是续命的标志
     if (store.state.user.refresh_token) {

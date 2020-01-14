@@ -8,7 +8,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     // 放置数据的地方
-    // 初始化的时候直接将用户信息给公共状态: 即一进入页面 ,一初始化Vuex就需要读取token
+    // 初始化的时候直接将用户信息给公共状态: 即一进入页面 ,一初始化Vuex就需要读取token user里面有token
     user: auth.getUser()
   },
   mutations: {
