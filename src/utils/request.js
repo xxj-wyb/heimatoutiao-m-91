@@ -28,8 +28,9 @@ instance.interceptors.request.use(function (config) {
   // config就是请求的参数  store.state.user里面携带token
   if (store.state.user.token) {
     // 如果token存在 就要统一注入
-    config.header['Authorization'] = `Bearer ${store.state.user.token}`
+    config.headers['Authorization'] = `Bearer ${store.state.user.token}`
   }
+  // 配置信息
   return config
 }, function (error) {
   // 返回失败 没有获取到token
