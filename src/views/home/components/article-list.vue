@@ -8,23 +8,23 @@
       <!-- 放置list组件  list组件可以实现上拉加载 -->
       <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
         <!-- v-for 渲染数据 -->
-        <van-cell v-for="article in articles" :key="article">
+        <van-cell v-for="article in articles" :key="article.art_id.toString()">
           <div class="article_item">
-            <h3 class="van-ellipsis">PullRefresh下拉刷新PullRefresh下拉刷新下拉刷新下拉刷新</h3>
+            <h3 class="van-ellipsis">{{ article.title }}</h3>
             <!-- 三图模式 -->
-            <div class="img_box">
-              <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-              <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-              <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+            <div class="img_box" v-if="article.cover.type === 3">
+              <van-image class="w33" fit="cover" :src="article.cover.images[0]" />
+              <van-image class="w33" fit="cover" :src="article.cover.images[1]" />
+              <van-image class="w33" fit="cover" :src="article.cover.images[2]" />
             </div>
             <!-- 单图模式 -->
-            <div class="img_box">
-              <van-image class="w100" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+            <div class="img_box" v-if="article.cover.type === 1">
+              <van-image class="w100" fit="cover" :src="article.cover.images[0]" />
             </div>
             <div class="info_box">
-              <span>你像一阵风</span>
-              <span>8评论</span>
-              <span>10分钟前</span>
+              <span>{{article.aut_name}}</span>
+              <span>{{article.comm_count}}评论</span>
+              <span>{{article.pubdate}}</span>
               <span class="close">
                 <van-icon name="cross"></van-icon>
               </span>
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { getArticles } from '@/api/article' // 引入请求模块
 export default {
   name: 'article-list',
   data () {
@@ -61,25 +62,40 @@ export default {
   methods: {
     // 上拉加载方法
     // 上拉加载的数据是追加 ,每次加载的数据追加到原有数据的末尾
-    onLoad () {
-      console.log('开始加载数据')
-      // 生成模拟数据： Array.from()方法就是将一个类数组对象或者可遍历对象转换成一个真正的数组，第二个参数一个回调函数，返回的是是数组里面的值
-      setTimeout(() => {
-        // 给数据设置一个上限 ,不超过50条调用upLoading加载数据， 如果超过50条，就不用自动加载了
-        if (this.articles.length < 50) {
-          let arr = Array.from(
-            Array(10),
-            (value, index) => this.articles.length + index + 1
-          )
-          // 把生成的数据追加到末尾  ...arr：解构数组，生成一个个元素
-          this.articles.push(...arr)
-          // 加载数据完毕后, 将原来的loading状态设置为 false
-          this.upLoading = false
-        } else {
-          // 如果超过50条,告诉list组件  我已经加载完了 不要再去触发onLoad事件了
-          this.finished = true
-        }
-      }, 1000)
+    async onLoad () {
+      // console.log('开始加载数据')
+      // // 生成模拟数据： Array.from()方法就是将一个类数组对象或者可遍历对象转换成一个真正的数组，第二个参数一个回调函数，返回的是是数组里面的值
+      // setTimeout(() => {
+      //   // 给数据设置一个上限 ,不超过50条调用upLoading加载数据， 如果超过50条，就不用自动加载了
+      //   if (this.articles.length < 50) {
+      //     let arr = Array.from(
+      //       Array(10),
+      //       (value, index) => this.articles.length + index + 1
+      //     )
+      //     // 把生成的数据追加到末尾  ...arr：解构数组，生成一个个元素
+      //     this.articles.push(...arr)
+      //     // 加载数据完毕后, 将原来的loading状态设置为 false
+      //     this.upLoading = false
+      //   } else {
+      //     // 如果超过50条,告诉list组件  我已经加载完了 不要再去触发onLoad事件了
+      //     this.finished = true
+      //   }
+      // }, 1000)
+
+      // 生成真实数据
+      // 判断当前时间戳是否为空，若为空，则传入当前时间Date.now()
+      const data = await getArticles({ channel_id: this.channel_id, timestamp: this.timestamp || Date.now() })
+      // 追加数据到队尾
+      this.articles.push(...data.results) // 返回的 results 是一个数组，用 ... 解构成一个个元素
+      // 加载数据完毕后, 将原来的loading状态设置为 false，关闭加载状态
+      this.upLoading = false
+      // 判断历史时间戳 pre_timestamp， 如果有历史 表示还可以继续往下看 否则就不看了
+      if (data.pre_timestamp) {
+        this.timestamp = data.pre_timestamp
+      } else {
+        // 否则认为 没有历史了 没有必要继续加载了
+        this.finished = true // 告诉list组件  我已经加载完了 不要再去触发onLoad事件了
+      }
     },
 
     // 下拉刷新的方法
