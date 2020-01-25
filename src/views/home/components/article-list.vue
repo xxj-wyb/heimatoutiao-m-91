@@ -45,7 +45,17 @@ export default {
       upLoading: false, // 是否开启上拉加载
       finished: false, // 是否已经完成全部的数据加载
       articles: [], // 定义一个数据来接收上拉加载的数据
-      refreshSuccessText: '' // 下拉成功后显示的文本
+      refreshSuccessText: '', // 下拉成功后显示的文本
+      timestamp: null // 定义一个时间戳 这个时间戳用来告诉服务器 现在我要什么样的时间的数据
+    }
+  },
+  props: {
+    // channel_id在 父组件 home的 index.vue 中,要用 props 传值
+    // props也可以跟一个对象
+    channel_id: {
+      type: Number, // 指定要传的props类型
+      required: true, // 要求必须传props
+      default: null // 给props一个默认值
     }
   },
   methods: {

@@ -4,7 +4,8 @@
     <!-- 通过 swipeable 属性可以开启左右滑动切换标签页 -->
     <van-tabs v-model="activeIndex" swipeable>
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
-        <article-list></article-list>
+        <!-- 将channel_id传递给article_list: 给谁传值，就给谁加属性 -->
+        <article-list :channel_id="channel.id"></article-list>
       </van-tab>
   </van-tabs>
   <span class="bar_btn">
