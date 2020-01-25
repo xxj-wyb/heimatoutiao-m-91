@@ -63,6 +63,7 @@ export default {
     // 上拉加载方法
     // 上拉加载的数据是追加 ,每次加载的数据追加到原有数据的末尾
     async onLoad () {
+      await this.$sleep() // 延迟处理：await 强制等待几秒
       // console.log('开始加载数据')
       // // 生成模拟数据： Array.from()方法就是将一个类数组对象或者可遍历对象转换成一个真正的数组，第二个参数一个回调函数，返回的是是数组里面的值
       // setTimeout(() => {
@@ -101,6 +102,7 @@ export default {
     // 下拉刷新的方法
     // 下拉刷新的数据应该 添加到原有数据的头部,并且要关闭加载状态
     async onRefresh () {
+      await this.$sleep() // 延迟处理：await 强制等待几秒
       // // 模拟数据逻辑:触发下拉刷新
       // console.log('下拉刷新')
       // setTimeout(() => {
@@ -113,7 +115,7 @@ export default {
 
       // 下拉刷新永远拉取的是最新的数据
       const data = await getArticles({ channel_id: this.channel_id, timestamp: Date.now() })
-      this.downLoading = false // 关掉下拉状态
+      this.downLoading = false
       // 判断有没有最新数据
       if (data.results.length) {
         // 如果长度大于0 表示有数据
