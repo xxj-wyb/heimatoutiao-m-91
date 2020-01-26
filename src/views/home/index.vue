@@ -5,28 +5,40 @@
     <van-tabs v-model="activeIndex" swipeable>
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
         <!-- 将channel_id传递给article_list: 给谁传值，就给谁加属性 -->
-        <article-list :channel_id="channel.id"></article-list>
+        <!-- 如果要监听子组件的事件, 就应该在子组件的标签上写监听 -->
+        <article-list @showAction="openMoreAction" :channel_id="channel.id"></article-list>
       </van-tab>
   </van-tabs>
   <span class="bar_btn">
       <van-icon name="wap-nav" />
   </span>
+  <!-- 放置弹层组件 -->
+  <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
+    <!-- 包裹反馈组件 -->
+    <more-action @dislike="dislike"></more-action>
+  </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
+import MoreAction from './components/more-action'
 import { getMyChannels } from '@/api/channels'
+import { disLikeArticle } from '@/api/article'
+import eventBus from '@/utils/eventBus'
+
 export default {
   name: 'home', // 用devtools查看组件时，可以看到对应的name名称
   data () {
     return {
       activeIndex: 0, // 默认激活第0个标签
-      channels: [] // 声明接收频道的数据
+      channels: [], // 声明接收频道的数据
+      showMoreAction: false, // 用来控制显示反馈层，默认不显示
+      articleId: null // 定义一个值接收文章id
     }
   },
   components: {
-    ArticleList // 局部注册组件
+    ArticleList, MoreAction // 局部注册组件
   },
   created () {
     this.getMyChannels() // 获取频道
@@ -36,6 +48,30 @@ export default {
       // 获取频道列表数据
       let data = await getMyChannels()
       this.channels = data.channels // 将频道赋值给声明的变量
+    },
+    // 监听子组件触发的事件 打开弹层
+    openMoreAction (artId) {
+      this.showMoreAction = true
+      this.articleId = artId // 接受不喜欢文章的id
+    },
+    // 调用不喜欢的文章接口
+    async dislike () {
+      try {
+        await disLikeArticle({ target: this.articleId })
+        this.$gnotify({
+          type: 'success',
+          message: '操作成功'
+        })
+        // 触发一个事件  相当于发出一个广播 听到广播的文章列表 去删除对应的数据
+        // 分别传入 文章id 频道id
+        eventBus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+        this.showMoreAction = false // 关闭弹层
+      } catch (error) {
+        this.$gnotify({
+          type: 'danger',
+          message: '操作失败'
+        })
+      }
     }
   }
 }

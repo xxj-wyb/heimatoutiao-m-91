@@ -19,15 +19,18 @@
               <van-image lazy-load class="w33" fit="cover" :src="article.cover.images[2]" />
             </div>
             <!-- 单图模式 -->
-            <div lazy-load class="img_box" v-if="article.cover.type === 1">
-              <van-image class="w100" fit="cover" :src="article.cover.images[0]" />
+            <div class="img_box" v-if="article.cover.type === 1">
+              <van-image lazy-load class="w100" fit="cover" :src="article.cover.images[0]" />
             </div>
             <div class="info_box">
               <span>{{article.aut_name}}</span>
               <span>{{article.comm_count}}评论</span>
               <!-- 使用过滤器处理相对时间  表达式 | 过滤器名称 -->
               <span>{{article.pubdate | relTime }}</span>
-              <span class="close">
+              <!-- 判断是否显示 叉号图标  登录状态应显示-->
+              <!-- 在子组件中注册 点击叉号的事件,并且告诉父组件,我要反馈
+                同时要传出文章id，,并且在父组件中接收 存储 -->
+              <span class="close" v-if="user.token" @click="$emit('showAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
             </div>
@@ -40,6 +43,8 @@
 
 <script>
 import { getArticles } from '@/api/article' // 引入请求模块
+import { mapState } from 'vuex'
+import eventBus from '@/utils/eventBus'
 export default {
   name: 'article-list',
   data () {
@@ -60,6 +65,26 @@ export default {
       required: true, // 要求必须传props
       default: null // 给props一个默认值
     }
+  },
+  computed: {
+    // 映射vuex中的store对象到计算属性上
+    ...mapState(['user'])
+  },
+  created () {
+    // 开启监听:子组件监听该事件,并判断是否是自己下面的数据 ,找到删除
+    eventBus.$on('delArticle', (articleId, channelId) => {
+      if (this.channel_id === channelId) {
+        // 这个条件表示 该列表就是当前激活的列表
+        /* 查找对应的文章: findIndex():该方法主要应用于查找第一个符合条件的数组元素。它的参数是一个回调函数
+          当条件为true时返回的是索引值,否则返回 -1 */
+        let index = this.articles.findIndex(item => item.art_id.toString() === articleId)
+        // 如果index大于 -1 表示找到了 就要删除
+        if (index > -1) {
+          // splice() 方法可删除从 index 处开始的零个或多个元素
+          this.articles.splice(index, 1)// 删除不喜欢的文章
+        }
+      }
+    })
   },
   methods: {
     // 上拉加载方法
