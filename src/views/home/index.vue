@@ -26,7 +26,7 @@
     <!-- 放置频道编辑组件 -->
     <!-- 频道数据在home组件中,可以直接用props传递给channel_edit组件,给谁传递就给谁添加属性 -->\
     <!-- 父组件监听 选择频道事件 -->
-    <channel-edit @selectChannel="selectChannel"  :channels="channels"></channel-edit>
+    <channel-edit  :activeIndex="activeIndex"  @selectChannel="selectChannel"  :channels="channels"></channel-edit>
   </van-action-sheet>
   </div>
 </template>
