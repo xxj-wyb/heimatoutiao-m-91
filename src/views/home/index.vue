@@ -24,8 +24,9 @@
   <!-- 编辑频道  van-action-sheet通过v-model绑定显示隐藏 -->
   <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
     <!-- 放置频道编辑组件 -->
-    <!-- 频道数据在home组件中,可以直接用props传递给channel_edit组件,给谁传递就给谁添加属性 -->
-    <channel-edit :channels="channels"></channel-edit>
+    <!-- 频道数据在home组件中,可以直接用props传递给channel_edit组件,给谁传递就给谁添加属性 -->\
+    <!-- 父组件监听 选择频道事件 -->
+    <channel-edit @selectChannel="selectChannel"  :channels="channels"></channel-edit>
   </van-action-sheet>
   </div>
 </template>
@@ -56,6 +57,13 @@ export default {
     this.getMyChannels() // 获取频道
   },
   methods: {
+    // 切换到对应的频道 关闭弹层
+    selectChannel (id) {
+      // 要通过id找到对应的频道索引
+      let index = this.channels.findIndex(item => item.id === id) // 获取切换频道的索引
+      this.activeIndex = index // 将tabs激活标签切换到对应的标签下
+      this.showChannelEdit = false // 关闭频道编辑的弹层
+    },
     async getMyChannels () {
       // 获取频道列表数据
       let data = await getMyChannels()
