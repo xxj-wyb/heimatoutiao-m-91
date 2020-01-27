@@ -23,8 +23,8 @@
     <div class="channel">
       <div class="tit">可选频道：</div>
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="index in 8" :key="index">
-          <span class="f12">频道{{index}}</span>
+        <van-grid-item v-for="channel in optionalChannels" :key="channel.id">
+          <span class="f12">{{channel.name}}</span>
           <van-icon class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
@@ -33,10 +33,12 @@
 </template>
 
 <script>
+import { getAllChannels } from '@/api/channels'
 export default {
   data () {
     return {
-      editing: false // 是否正在编辑
+      editing: false, // 是否正在编辑
+      allChannels: [] // 用来接收所有的频道
     }
   },
   props: {
@@ -45,6 +47,23 @@ export default {
       type: Array, // 类型是数组
       default: () => [] // eslint 要求我们必须用一个函数来声明数组类型 所以用箭头函数
     }
+  },
+  methods: {
+    async getAllChannels () {
+      const data = await getAllChannels()
+      this.allChannels = data.channels // 给所有频道赋值
+    }
+  },
+  computed: {
+    //   可选频道 =  全部频道  - 当前的频道
+    // some() 方法用于检测数组中的元素是否满足指定条件（函数提供）,如果有一个元素满足条件，则表达式返回true
+    // filter也是一个常用的操作，它用于把Array的某些元素过滤掉，然后返回剩下的元素。
+    optionalChannels () {
+      return this.allChannels.filter(item => !this.channels.some(o => o.id === item.id))
+    }
+  },
+  created () {
+    this.getAllChannels() // 获取所有频道
   }
 }
 </script>
