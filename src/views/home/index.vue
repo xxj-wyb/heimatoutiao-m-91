@@ -8,33 +8,43 @@
         <!-- 如果要监听子组件的事件, 就应该在子组件的标签上写监听 -->
         <article-list @showAction="openMoreAction" :channel_id="channel.id"></article-list>
       </van-tab>
-  </van-tabs>
-  <!-- 显示编辑频道的图标 -->
-  <span class="bar_btn" @click="showChannelEdit=true">
+    </van-tabs>
+    <!-- 显示编辑频道的图标 -->
+    <span class="bar_btn" @click="showChannelEdit=true">
       <van-icon name="wap-nav" />
-  </span>
-  <!-- 放置弹层组件 -->
-  <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
-    <!-- 包裹反馈组件 -->  <!-- 父组件监听事件 -->
-    <!-- report事件中的第一个参数 $event实际上就是 moreAction组件 传出的type(item.value);
+    </span>
+    <!-- 放置弹层组件 -->
+    <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
+      <!-- 包裹反馈组件 -->
+      <!-- 父组件监听事件 -->
+      <!-- report事件中的第一个参数 $event实际上就是 moreAction组件 传出的type(item.value);
       dislike事件中的$event就相当于占位符-->
-    <more-action @dislike="dislikeOrReport($event,'dislike')" @report="dislikeOrReport($event,'report')"></more-action>
-  </van-popup>
+      <more-action
+        @dislike="dislikeOrReport($event,'dislike')"
+        @report="dislikeOrReport($event,'report')"
+      ></more-action>
+    </van-popup>
 
-  <!-- 编辑频道  van-action-sheet通过v-model绑定显示隐藏 -->
-  <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-    <!-- 放置频道编辑组件 -->
-    <!-- 频道数据在home组件中,可以直接用props传递给channel_edit组件,给谁传递就给谁添加属性 -->\
-    <!-- 父组件监听 选择频道事件 -->
-    <channel-edit @delChannel="delChannel" :activeIndex="activeIndex"  @selectChannel="selectChannel"  :channels="channels"></channel-edit>
-  </van-action-sheet>
+    <!-- 编辑频道  van-action-sheet通过v-model绑定显示隐藏 -->
+    <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
+      <!-- 放置频道编辑组件 -->
+      <!-- 频道数据在home组件中,可以直接用props传递给channel_edit组件,给谁传递就给谁添加属性 -->
+      <!-- 父组件监听 选择频道事件 -->
+      <channel-edit
+        @addChannel="addChannel"
+        @delChannel="delChannel"
+        :activeIndex="activeIndex"
+        @selectChannel="selectChannel"
+        :channels="channels"
+      ></channel-edit>
+    </van-action-sheet>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
 import MoreAction from './components/more-action'
-import { getMyChannels, delChannel } from '@/api/channels'
+import { getMyChannels, delChannel, addChannel } from '@/api/channels'
 import { disLikeArticle, reportArticle } from '@/api/article'
 import eventBus from '@/utils/eventBus'
 import ChannelEdit from './components/channel-edit'
@@ -51,7 +61,9 @@ export default {
     }
   },
   components: {
-    ArticleList, MoreAction, ChannelEdit // 局部注册组件
+    ArticleList,
+    MoreAction,
+    ChannelEdit // 局部注册组件
   },
   created () {
     this.getMyChannels() // 获取频道
@@ -74,6 +86,11 @@ export default {
       } catch (error) {
         this.$gnotify({ type: 'danger', message: '删除频道失败' })
       }
+    },
+    // 添加频道
+    async addChannel (channel) {
+      await addChannel(channel) // 完成写入本地缓存的操作 这只是写入缓存
+      this.channels.push(channel) // 这一步是修改 data中的数据
     },
     // 切换到对应的频道 关闭弹层
     selectChannel (id) {
@@ -135,7 +152,8 @@ export default {
     // params是 举报类型的参数
     async dislikeOrReport (params, operateType) {
       try {
-        operateType === 'dislike' ? await disLikeArticle({ target: this.articleId })
+        operateType === 'dislike'
+          ? await disLikeArticle({ target: this.articleId })
           : await reportArticle({ target: this.articleId, type: params })
         this.$gnotify({
           type: 'success',
@@ -143,7 +161,11 @@ export default {
         })
         // 触发一个事件  相当于发出一个广播 听到广播的文章列表 去删除对应的数据
         // 分别传入 文章id 频道id
-        eventBus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+        eventBus.$emit(
+          'delArticle',
+          this.articleId,
+          this.channels[this.activeIndex].id
+        )
         this.showMoreAction = false // 关闭弹层
       } catch (error) {
         this.$gnotify({
