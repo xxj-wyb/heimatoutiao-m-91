@@ -5,15 +5,17 @@
     <van-nav-bar left-arrow title="搜索中心" @click-left="$router.back()"></van-nav-bar>
     <!-- 导航 -->
     <!-- 搜索框 -->
-    <van-search  placeholder="请输入搜索关键词" shape="round" />
+    <!-- 如果想自动过滤前后空格,可以给v-model一个修饰符 trim -->
+    <van-search v-model.trim="q" placeholder="请输入搜索关键词" shape="round" />
+    <!-- 有输入内容时  =>显示联想搜索， 没内容时  => 显示历史记录-->
     <!-- 联想搜索 -->
-    <van-cell-group class="suggest-box" >
+    <van-cell-group class="suggest-box" v-if="q" >
       <van-cell icon="search">
         <span>j</span>ava
       </van-cell>
     </van-cell-group>
     <!-- 历史记录 -->
-    <div class="history-box">
+    <div class="history-box" v-else>
       <div class="head">
         <span>历史记录</span>
         <van-icon name="delete"></van-icon>
@@ -30,7 +32,12 @@
 
 <script>
 export default {
-  name: 'search'
+  name: 'search',
+  data () {
+    return {
+      q: ''
+    }
+  }
 }
 </script>
 
