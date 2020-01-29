@@ -11,8 +11,8 @@
     <!-- 有输入内容时  =>显示联想搜索， 没内容时  => 显示历史记录-->
     <!-- 联想搜索 -->
     <van-cell-group class="suggest-box" v-if="q" >
-      <van-cell icon="search">
-        <span>j</span>ava
+      <van-cell @click="toSearchResult(item)" icon="search" v-for="item in suggestList" :key="item">
+        {{ item }}
       </van-cell>
     </van-cell-group>
     <!-- 历史记录 -->
@@ -39,13 +39,48 @@
 </template>
 
 <script>
+import { suggestion } from '@/api/article'
 const key = 'hm-91-toutiao-history' // 定义一个key，用来当做存储 本地历史记录的key
 export default {
   name: 'search',
   data () {
     return {
       q: '', // 查询内容
-      historyList: [] // 存放历史记录的数据
+      historyList: [], // 存放历史记录的数据
+      suggestList: [] // 存放联想建议的数组
+    }
+  },
+  // 用watch监听 关键字 改变，进行联想补全
+  watch: {
+    // 防抖搜索 只执行最后一次
+    // q () {
+    //   clearTimeout(this.timer) // 在输入完成之前，清除定时器，只执行最后一次
+    //   this.timer = setTimeout(async () => {
+    //     // 搜索联想的词汇
+    //     if (!this.q) {
+    //       // 当搜索关键字变成空的时候将 联想数组清空
+    //       this.suggestList = []
+    //       return false // 直接返回 下面不再执行
+    //     }
+    //     let data = await suggestion({ q: this.q }) // 搜索联想建议
+    //     this.suggestList = data.options
+    //   }, 500)
+    // }
+
+    // 节流搜索  在单位时间内按频率执行一次
+    q () {
+      if (!this.timer) {
+        this.timer = setTimeout(async () => {
+          this.timer = null // 将定时器的标记清空
+          // 搜索联想的词汇
+          if (!this.q) {
+            this.suggestList = [] // 当搜索关键字变成空的时候将 联想数组清空
+            return false // 直接返回 下面不再执行
+          }
+          let data = await suggestion({ q: this.q })
+          this.suggestList = data.option
+        }, 500)
+      }
     }
   },
   methods: {
@@ -62,17 +97,26 @@ export default {
       this.historyList = [] // 清空所有历史
       localStorage.setItem(key, '[]') // 重新写入缓存
     },
-    // 什么时候触发搜索： 回车/虚拟键盘搜索
+    // 历史记录：什么时候触发搜索： 回车/虚拟键盘搜索
     onSearch () {
       // 跳转到搜索结果之前 应该把当前的搜索关键字 写入到历史记录
       if (!this.q) return // 如果q为空则没有必要往下走
       // 如果不为空 要将this.q加入到历史记录中去
       let obj = new Set(this.historyList)// 生成一个set变量用来接收历史关键字  new Set会自动去重
       obj.add(this.q)
-      this.historyList = Array.from(obj) // Array.from(): 将set转回数组
+      this.historyList = Array.from(obj) // Array.from(): 将set转为数组
       localStorage.setItem(key, JSON.stringify(this.historyList)) // 重新写入缓存
       //  触发搜索事件应该去搜索结果页面 而且 也要携带参数
       this.$router.push({ path: '/search/result', query: { q: this.q } }) // 直接跳转到搜索结果界面
+    },
+    // 联想搜索： 将点击的搜索选项加入到搜索历史,并且跳到搜索结果页面
+    toSearchResult (text) {
+      // 放入历史记录
+      let obj = new Set(this.historyList) // 生成一个set变量用来接收历史关键字  new Set会自动去重
+      obj.add(text) // 把搜索出来的文本也放入历史记录中
+      this.historyList = Array.from(obj) // Array.from(): 将set转为数组
+      localStorage.setItem(key, JSON.stringify(this.historyList))// 重新写入缓存
+      this.$router.push({ path: '/search/result', query: { q: text } })// 直接跳转到搜索结果界面
     }
   },
   created () {
