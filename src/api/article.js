@@ -48,3 +48,10 @@ export function searchArticle (params) {
     params
   })
 }
+
+// 封装 获取文章详情API
+export function getArticleInfo (id) {
+  return request({
+    url: `/articles/${id}`
+  })
+}

@@ -8,7 +8,9 @@
       <!-- 放置list组件  list组件可以实现上拉加载 -->
       <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
         <!-- v-for 渲染数据 -->
-        <van-cell v-for="article in articles" :key="article.art_id.toString()">
+        <!-- 点击van-cell 跳转到文章详情:van-cell组件有个to属性, 同router-link中的to属性，点击后跳转的目标路由对象-->
+        <!-- 动态路由： query传值(?id=123)  params传值(/123)  -->
+        <van-cell :to="`/article?articleId=${ article.art_id.toString() }`" v-for="article in articles" :key="article.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{ article.title }}</h3>
             <!-- 三图模式 -->
@@ -29,8 +31,8 @@
               <span>{{article.pubdate | relTime }}</span>
               <!-- 判断是否显示 叉号图标  登录状态应显示-->
               <!-- 在子组件中注册 点击叉号的事件,并且告诉父组件,我要反馈
-                同时要传出文章id，,并且在父组件中接收 存储 -->
-              <span class="close" v-if="user.token" @click="$emit('showAction',article.art_id.toString())">
+                同时要传出文章id，,并且在父组件中接收 存储  stop 修饰符，阻止事件冒泡-->
+              <span class="close" v-if="user.token" @click.stop="$emit('showAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
             </div>

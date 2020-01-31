@@ -8,7 +8,8 @@
     <van-list v-model="upLoading" :finished="finished" @load="onLoad">
       <van-cell-group>
         <!-- art_id有可能是大数字 超过一定长度会转成 BigNumber  要toString一下 -->
-        <van-cell v-for="item in articles" :key="item.art_id.toString()">
+        <!-- 搜索文章结果: 点击文章时  => 跳转到文章详情  => 携带文章id -->
+        <van-cell :to="`/article?articleId=${item.art_id.toString()}`" v-for="item in articles" :key="item.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{ item.title }}</h3>
             <div class="img_box" v-if="item.cover.type === 3">
