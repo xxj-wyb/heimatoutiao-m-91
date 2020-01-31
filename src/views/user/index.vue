@@ -44,13 +44,14 @@
       <van-cell icon="edit" title="编辑资料" to="/user/profile" is-link />
       <van-cell icon="chat-o" title="小智同学" to="/user/chat" is-link />
       <van-cell icon="setting-o" title="系统设置" is-link />
-      <van-cell icon="warning-o" title="退出登录" to="/login" is-link />
+      <van-cell icon="warning-o" title="退出登录" @click="lgout" is-link />
     </van-cell-group>
   </div>
 </template>
 
 <script>
 import { getUserInfo } from '@/api/user'
+import { mapMutations } from 'vuex' // 引入辅助函数
 export default {
   name: 'user',
   data () {
@@ -59,8 +60,25 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['clearUser']), // 映射vuex中的mutations方法,调用clearUser方法，清空User
+    // 获取用户个人信息
     async getUserInfo () {
       this.userInfo = await getUserInfo() // 返回的就是data，直接赋值给userInfo
+    },
+    // 退出登录方法
+    async lgout () {
+      try {
+        // 先询问要不要退出
+        await this.$dialog.confirm({ message: '您确定要退出登录吗' })
+        //  应该将之前的token给删除掉
+        // 传统方法： this.$store.commit('clearUser')
+        // 用了mutations方法，直接调用clearUser()方法
+        this.clearUser() // 清除用户的token
+        // 跳到登录页
+        this.$router.push('/login')
+      } catch (error) {
+
+      }
     }
   },
   created () {
