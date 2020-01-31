@@ -28,3 +28,10 @@ export function unFollowUser (target) {
     method: 'delete'
   })
 }
+
+// 封装 获取用户自己信息API
+export function getUserInfo () {
+  return request({
+    url: '/user'
+  })
+}
