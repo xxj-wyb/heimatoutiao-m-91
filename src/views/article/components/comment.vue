@@ -1,5 +1,7 @@
 <template>
+<!-- 评论列表组件 -->
   <div class="comment">
+      <!-- 评论列表 需要功能：上拉加载loading； 是否全部加载完成：finished -->
     <van-list v-model="loading" :finished="finished" finished-text="没有更多了">
       <div class="item van-hairline--bottom van-hairline--top" v-for="index in 5" :key="index">
         <van-image
