@@ -55,3 +55,12 @@ export function getArticleInfo (id) {
     url: `/articles/${id}`
   })
 }
+
+// 获取评论或者获取评论回复
+export function getComments (params) {
+  return request({
+    url: '/comments',
+    // query参数 放置在params; body参数放置在 data
+    params
+  })
+}
