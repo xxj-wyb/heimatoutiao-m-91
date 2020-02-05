@@ -56,11 +56,20 @@ export function getArticleInfo (id) {
   })
 }
 
-// 获取评论或者获取评论回复
+// 封装 获取评论或者获取评论回复 的方法
 export function getComments (params) {
   return request({
     url: '/comments',
     // query参数 放置在params; body参数放置在 data
     params
+  })
+}
+
+// 封装 评论或者回复评论 的方法
+export function commentOrReply (data) {
+  return request({
+    url: '/comments',
+    method: 'post', // 与获取评论或者获取评论回复的请求类型不同，但地址相同
+    data
   })
 }

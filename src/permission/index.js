@@ -17,7 +17,8 @@ router.beforeEach(function (to, from, next) {
       path: '/login',
       query: {
         // redirectUrl：把要去的地址传到到登录页(现在这个地址还没有权限访问) => 登录成功之后，有了权限 再回到刚才没有权限去的地址
-        redirectUrl: to.path
+        // 将path换成fullPath这个完整地址，携带id的，可以防止退出再登录后地址id的问题
+        redirectUrl: to.fullPath
       }
     }
     next(toPath)
