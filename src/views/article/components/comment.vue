@@ -23,7 +23,7 @@
           <p>{{ comment.content }}</p>
           <p>
             <span class="time">{{ comment.pubdate | relTime }}</span>&nbsp;
-            <van-tag plain @click="showReply=true">{{ comment.reply_count }} 回复</van-tag>
+            <van-tag plain @click="openReply()">{{ comment.reply_count }} 回复</van-tag>
           </p>
         </div>
       </div>
@@ -34,6 +34,21 @@
         <span class="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
+    <!-- 对评论进行回复的列表弹层 -->
+    <!-- van-action-sheet:通过v-model来绑定显示或隐藏,点击回复的时候才打开对评论的评论列表 -->
+    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+      <!-- 回复组件 -->
+      <van-list v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
+        <div class="item van-hairline--bottom van-hairline--top" v-for="index in 8" :key="index">
+          <van-image round width="1rem" height="1rem" fit="fill" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+          <div class="info">
+            <p><span class="name">一阵清风</span></p>
+            <p>评论的内容，。。。。</p>
+            <p><span class="time">两天内</span></p>
+          </div>
+        </div>
+      </van-list>
+    </van-action-sheet>
   </div>
 
   <!-- 都不输入框 -->
@@ -55,10 +70,22 @@ export default {
       // 用来存放评论列表的数据
       comments: [],
       // 表示分页依据 如果为空,表示从第一页开始;第二页数据需要传入第一页返回的最后一个id
-      offset: null
+      offset: null, // 获取文章评论的分页依据
+      showReply: false, // 控制回复列表组件的显示和隐藏
+      reply: {
+        // 专门用reply这个对象存放回复相关的数据
+        loading: false, // 是回复列表组件的状态
+        finished: false, // 是回复列表组件的结束状态
+        offset: null, // 偏移量 获取评论的评论的分页依据 类型为 c
+        list: [] // 用于存放 当前弹出的关于某个评论的回复列表的数据
+      }
     }
   },
   methods: {
+    // 打开对评论的回复
+    openReply () {
+      this.showReply = true
+    },
     // 一级评论：对文章进行评论 type类型为a
     async onLoad () {
       // 加载评论数据
@@ -127,6 +154,25 @@ export default {
   .submit {
     font-size: 12px;
     color: #3296fa;
+  }
+}
+.reply_dialog {
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+  .van-action-sheet__content{
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 44px;
   }
 }
 </style>
