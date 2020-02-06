@@ -30,7 +30,7 @@
       <!-- 1 本地相册选择图片 -->
       <!-- 2 拍照 -->
       <!-- is-link 是右边的小箭头 -->
-      <van-cell is-link title="本地相册选择图片"></van-cell>
+      <van-cell @click="openChangeFile" is-link title="本地相册选择图片"></van-cell>
       <van-cell is-link title="拍照"></van-cell>
     </van-popup>
     <!-- 昵称弹层 -->
@@ -63,12 +63,16 @@
           @confirm="confirmDate">
       </van-datetime-picker>
     </van-popup>
+    <!-- 文件选择控件 但是这个控件不想在页面中显示=>display:none-->
+    <!-- 在vue中通过ref标识dom对象 获取dom对象的方法：this.$refs.dom -->
+    <!-- @change事件会在 选择文件后触发 -->
+    <input @change="upload" ref="myFile" type="file" style="display:none">
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件，处理时间格式
-import { getUserProfile } from '@/api/user' // 引入获取资料的方法
+import { getUserProfile, updateImg } from '@/api/user' // 引入获取资料的方法
 export default {
   name: 'profile',
   data () {
@@ -125,6 +129,27 @@ export default {
       let data = await getUserProfile()
       // 将数据赋值给user
       this.user = data
+    },
+    // 点击 本地相册选择图片 时触发
+    openChangeFile () {
+      // 上传本地文件
+      // 触发文件上传组件的点击事件
+      // 需要先获取文件上传的dom对象再触发 this.$refs.dom
+      this.$refs.myFile.click() // 触发文件上传组件的点击方法
+    },
+    // 当我们选择图片之后就会触发
+    async upload () {
+      // 应该上传头像 获取选择的图片
+      console.log(this.$refs.myFile.files[0])
+
+      // 首先 应该把这个图片上传到服务器
+      // 调用编辑头像的方法 formdata 类型
+      let data = new FormData()
+      data.append('photo', this.$refs.myFile.files[0]) // 往formData中添加参数
+      let result = await updateImg(data)
+      // 将上传成功的头像设置给当前头像
+      this.user.photo = result.photo // photo就是头像url地址
+      this.showPhoto = false // 关闭弹层
     }
   },
   created () {
