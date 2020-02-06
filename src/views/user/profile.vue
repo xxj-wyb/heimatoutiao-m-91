@@ -2,7 +2,7 @@
 <!-- 编辑资料 -->
   <div class="container">
       <!-- left-arrow:是否显示左侧箭头 -->
-    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" ></van-nav-bar>
+    <van-nav-bar @click-right="saveUserInfo" left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" ></van-nav-bar>
     <van-cell-group>
       <!-- 头像 -->
       <van-cell is-link title="头像"  center>
@@ -72,7 +72,7 @@
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件，处理时间格式
-import { getUserProfile, updateImg } from '@/api/user' // 引入获取资料的方法
+import { getUserProfile, updateImg, saveUserInfo } from '@/api/user' // 引入获取资料的方法
 export default {
   name: 'profile',
   data () {
@@ -150,6 +150,16 @@ export default {
       // 将上传成功的头像设置给当前头像
       this.user.photo = result.photo // photo就是头像url地址
       this.showPhoto = false // 关闭弹层
+    },
+    // 保存方法  调用保存接口  这里是不需要传photo数据的=>因为：1、我们通过别的方法 更新了头像upload ()；2、photo不是所要求的 base64字符串
+    async saveUserInfo () {
+      try {
+        // 清除掉photo：通过...解构出user中的photo，json后面的photo会覆盖前面的
+        await saveUserInfo({ ...this.user, photo: null })
+        this.$gnotify({ type: 'success', message: '保存成功' })
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '保存失败' })
+      }
     }
   },
   created () {

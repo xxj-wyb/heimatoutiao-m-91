@@ -51,3 +51,12 @@ export function updateImg (data) {
     data
   })
 }
+
+// 封装一个 保存用户信息的方法
+export function saveUserInfo (data) {
+  return request({
+    url: '/user/profile',
+    method: 'patch',
+    data
+  })
+}
