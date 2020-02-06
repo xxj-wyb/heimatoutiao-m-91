@@ -35,3 +35,10 @@ export function getUserInfo () {
     url: '/user'
   })
 }
+
+// 封装 获取用户个人资料 的API
+export function getUserProfile () {
+  return request({
+    url: '/user/profile'
+  })
+}

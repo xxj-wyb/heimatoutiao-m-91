@@ -13,7 +13,7 @@
           fit="cover"
           round
           @click="showPhoto=true"
-          src="https://img.yzcdn.cn/vant/cat.jpeg"
+          :src="user.photo"
         />
       </van-cell>
       <!-- 用户昵称 -->
@@ -68,6 +68,7 @@
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件，处理时间格式
+import { getUserProfile } from '@/api/user' // 引入获取资料的方法
 export default {
   name: 'profile',
   data () {
@@ -118,7 +119,16 @@ export default {
     confirmDate (date) {
       this.user.birthday = dayjs(date).format('YYYY-MM-DD') // 将转化后的结果赋值给 user中的生日
       this.showBirthDay = false // 关闭弹层
+    },
+    // 获取用户资料的方法
+    async getUserProfile () {
+      let data = await getUserProfile()
+      // 将数据赋值给user
+      this.user = data
     }
+  },
+  created () {
+    this.getUserProfile() // 调用获取用户资料的方法
   }
 }
 </script>
