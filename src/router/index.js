@@ -16,6 +16,9 @@ const SearchResult = () => import('@/views/search/result') // 搜索结果
 
 Vue.use(VueRouter)
 
+// 一般来说 不会将所有的组件进行缓存 只会挑几个交互需要的组件
+// 可以在路由表 给 layout组件 一个标识 也就是 路由元信息`,meta
+// meta 属性 是route信息里面的一个属性 我们可以在这里存放一些数据 在路由切换的时候使用
 const routes = [
   {
     path: '/',
@@ -23,7 +26,14 @@ const routes = [
     component: Layout, // 一级路由
     children: [
       // 这里放  二级路由
-      { path: '/', component: Home },
+      {
+        path: '/', // 由于一级路由下存在二级路由 并且path相同 所以meta放在二级路由下
+        component: Home,
+        // meta 属性生存在 二级路由并且path相同的情况下 需要写到二级路由下；一级路由path不相同就放在一级路由下
+        meta: {
+          isAlive: true // 是否缓存组件实例
+        }
+      },
       { path: '/question', component: Question },
       { path: '/video', component: Video },
       { path: '/user', component: User }
