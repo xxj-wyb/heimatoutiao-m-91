@@ -2,8 +2,9 @@
   <!-- 这里面封装 上拉加载和下拉刷新的组件 -->
 
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
-  <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-  <div class="scroll-wrapper">
+  <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置；
+    首先，给article-list组件定义一个属性来记录 当前的组件实例滚动的位置-->
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remeber">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <!-- 放置list组件  list组件可以实现上拉加载 -->
       <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
@@ -56,7 +57,8 @@ export default {
       finished: false, // 是否已经完成全部的数据加载
       articles: [], // 定义一个数据来接收上拉加载的数据
       refreshSuccessText: '', // 下拉成功后显示的文本
-      timestamp: null // 定义一个时间戳 这个时间戳用来告诉服务器 现在我要什么样的时间的数据
+      timestamp: null, // 定义一个时间戳 这个时间戳用来告诉服务器 现在我要什么样的时间的数据
+      scrollTop: 0 // 记录滚动的位置
     }
   },
   props: {
@@ -89,6 +91,11 @@ export default {
     })
   },
   methods: {
+    // 定义一个记录滚动位置的方法
+    remember (event) {
+      // 记录此次滚动事件中的滚动条距离顶部的高度
+      this.scrollTop = event.target.scrollTop
+    },
     // 上拉加载方法
     // 上拉加载的数据是追加 ,每次加载的数据追加到原有数据的末尾
     async onLoad () {
@@ -158,6 +165,16 @@ export default {
         //  如果没有数据更新  什么都不需要变化
         this.refreshSuccessText = '已是最新数据'
       }
+    }
+  },
+  // 激活函数 当组件被keep-alive 包裹，包裹的组件就不会被销毁,而是被缓存起来,那么组件实例就不会执行对应的 销毁钩子函数
+  // keep-alive 包裹的组件 当再次被唤醒的时候, 会执行它的 activated 和 deactivated 这两个函数
+  activated () {
+    // 唤醒的时候需要把记录的位置 恢复回去
+    // 需要在组件重新激活时 重新 设置原来的滚动条
+    if (this.$refs.myScroll && this.scrollTop) {
+      // // scrollTop 获取元素滚动出去的距离
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置赋值给dom元素
     }
   }
 }

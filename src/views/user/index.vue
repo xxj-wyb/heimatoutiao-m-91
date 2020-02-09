@@ -60,10 +60,15 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['clearUser']), // 映射vuex中的mutations方法,调用clearUser方法，清空User
+    // 引入 更新头像的 updatePhoto 方法
+    ...mapMutations(['clearUser', 'updatePhoto']), // 映射vuex中的mutations方法,调用clearUser方法，清空User
     // 获取用户个人信息
     async getUserInfo () {
       this.userInfo = await getUserInfo() // 返回的就是data，直接赋值给userInfo
+      // this.userInfo 已经是个人资料的数据了，这里面是有头像的
+      // this.userInfo.photo 就是头像 需要把这个头像设置给公共的state
+      // 在获取用户资料时 更新头像
+      this.updatePhoto({ photo: this.userInfo.photo }) // 调用mutation里面的方法，里面的参数就是载荷
     },
     // 退出登录方法
     async lgout () {

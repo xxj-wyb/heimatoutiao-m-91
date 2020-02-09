@@ -73,6 +73,7 @@
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件，处理时间格式
 import { getUserProfile, updateImg, saveUserInfo } from '@/api/user' // 引入获取资料的方法
+import { mapMutations } from 'vuex' // 引入辅助函数
 export default {
   name: 'profile',
   data () {
@@ -95,6 +96,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updatePhoto']), // 在编辑资料页面引入公共的mutations方法 更新头像
     // 绑定按钮点击事件 校验昵称
     btnName () {
       if (this.user.name.length < 1 || this.user.name.length > 7) {
@@ -127,6 +129,9 @@ export default {
     // 获取用户资料的方法
     async getUserProfile () {
       let data = await getUserProfile()
+      //  获取资料成功后 设置头像信息
+      // 将头像地址 更新设置给公共的state
+      this.updatePhoto({ photo: data.photo })
       // 将数据赋值给user
       this.user = data
     },
@@ -150,6 +155,8 @@ export default {
       // 将上传成功的头像设置给当前头像
       this.user.photo = result.photo // photo就是头像url地址
       this.showPhoto = false // 关闭弹层
+      //  当头像上传成功之后 把上传成功的头像的地址 设置给state
+      this.updatePhoto({ photo: result.photo }) // 调用mutations方法 将数据设置给公共状态
     },
     // 保存方法  调用保存接口  这里是不需要传photo数据的=>因为：1、我们通过别的方法 更新了头像upload ()；2、photo不是所要求的 base64字符串
     async saveUserInfo () {
