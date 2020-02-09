@@ -4,7 +4,7 @@
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置；
     首先，给article-list组件定义一个属性来记录 当前的组件实例滚动的位置-->
-  <div ref="myScroll" class="scroll-wrapper" @scroll="remeber">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <!-- 放置list组件  list组件可以实现上拉加载 -->
       <van-list v-model="upLoading" :finished="finished" finished-text="没有更多了" @load="onLoad">
@@ -58,7 +58,7 @@ export default {
       articles: [], // 定义一个数据来接收上拉加载的数据
       refreshSuccessText: '', // 下拉成功后显示的文本
       timestamp: null, // 定义一个时间戳 这个时间戳用来告诉服务器 现在我要什么样的时间的数据
-      scrollTop: 0 // 记录滚动的位置
+      scrollTop: 0 // 记录当前文章实例所滚动的位置
     }
   },
   props: {
@@ -75,7 +75,9 @@ export default {
     ...mapState(['user'])
   },
   created () {
+    // 在created中只要开启一次监听，后面出发了事件，就会进入到回调函数
     // 开启监听:子组件监听该事件,并判断是否是自己下面的数据 ,找到删除
+    // 监听  删除文章事件
     eventBus.$on('delArticle', (articleId, channelId) => {
       if (this.channel_id === channelId) {
         // 这个条件表示 该列表就是当前激活的列表
@@ -89,12 +91,29 @@ export default {
         }
       }
     })
+    // 开启一个新的监听 监听当前tab切换的事件
+    eventBus.$on('changeTab', id => {
+      // 判断切换的id是否等于article-list接收的频道id；这是因为artcile-list实例是有多个的
+      if (id === this.channel_id) {
+        // 如果相等 说明找对了对应的article-list实例
+        // 因为 切换事件之后 会执行 dom的更新 => dom的更新是异步的
+        // 如果保证自己 在上一次完成页面渲染更新之后 执行逻辑 => this.$nextTick()
+        // this.$nextTick会保证在changeTab动作切换完成并且完成界面渲染之后执行
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+            // 当滚动距离 不为0 且dom元素存在的情况下，即原来页面滚动了 才去执行滚回去的操作
+            this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置赋值给dom元素，滚到哪就记录到哪
+          }
+        })
+      }
+    })
   },
   methods: {
     // 定义一个记录滚动位置的方法
     remember (event) {
-      // 记录此次滚动事件中的滚动条距离顶部的高度
-      this.scrollTop = event.target.scrollTop
+      // 记录此次滚动事件中的滚动条距离顶部的高度； scrollTop 获取元素滚动出去的距离
+      // event.target 指的是 当前点击事件的元素
+      this.scrollTop = event.target.scrollTop // 当前元素滚动出去的距离 就是滚动条滚动出去的距离
     },
     // 上拉加载方法
     // 上拉加载的数据是追加 ,每次加载的数据追加到原有数据的末尾
@@ -168,13 +187,15 @@ export default {
     }
   },
   // 激活函数 当组件被keep-alive 包裹，包裹的组件就不会被销毁,而是被缓存起来,那么组件实例就不会执行对应的 销毁钩子函数
+  // 包裹关系：keep-alive => router-view => home => article-list
   // keep-alive 包裹的组件 当再次被唤醒的时候, 会执行它的 activated 和 deactivated 这两个函数
   activated () {
     // 唤醒的时候需要把记录的位置 恢复回去
     // 需要在组件重新激活时 重新 设置原来的滚动条
     if (this.$refs.myScroll && this.scrollTop) {
-      // // scrollTop 获取元素滚动出去的距离
-      this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置赋值给dom元素
+      // 当滚动距离 不为0 且dom元素存在的情况下，即原来页面滚动了 才去执行滚回去的操作
+      // scrollTop 获取元素滚动出去的距离
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置赋值给dom元素，滚到哪就记录到哪
     }
   }
 }
