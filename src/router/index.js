@@ -29,7 +29,7 @@ const routes = [
       {
         path: '/', // 由于一级路由下存在二级路由 并且path相同 所以meta放在二级路由下
         component: Home,
-        // meta 属性生存在 二级路由并且path相同的情况下 需要写到二级路由下；一级路由path不相同就放在一级路由下
+        // meta 属性生存在 二级路由并且path相同的情况下 需要写到二级路由下
         meta: {
           isAlive: true // 是否缓存组件实例
         }
